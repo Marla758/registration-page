@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Page</title>
+    <style>
+       
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 20px;
+        }
+        .form-container {
+            background: white;
+            width: 450px;
+            margin: auto;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .message-box {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f9f9f9;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            background: #ffe6e6;
+            border-left-color: red;
+            color: #cc0000;
+        }
+        .success {
+            background: #e6ffe6;
+            border-left-color: green;
+            color: #006600;
+        }
+        .info {
+            background: #eef;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 13px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2>Registration Form</h2>
+
+    <!-- the form with all input fields -->
+    <form id="registerForm">
+        <div class="input-group">
+            <label>Username:</label>
+            <input type="text" id="username" placeholder="At least 4 characters">
+        </div>
+
+        <div class="input-group">
+            <label>Password:</label>
+            <input type="password" id="password" placeholder="Min 8 chars, letters + numbers">
+        </div>
+
+        <div class="input-group">
+            <label>Confirm Password:</label>
+            <input type="password" id="confirmPassword" placeholder="Re-enter password">
+        </div>
+
+        <div class="input-group">
+            <label>Email:</label>
+            <input type="email" id="email" placeholder="name@example.com">
+        </div>
+
+        <div class="input-group">
+            <label>Date of Birth:</label>
+            <input type="date" id="dob">
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <!-- This div will show error or success messages -->
+    <div id="message" class="message-box">
+        Fill all fields and click Submit.
+    </div>
+
+    <div class="info">
+        <strong>Form Validations:</strong>
+        <ul>
+            <li>All fields must be filled</li>
+            <li>Username must have at least 4 characters</li>
+            <li>Password must be at least 8 characters long AND contain at least one letter AND one number</li>
+            <li>Password and Confirm Password must match exactly</li>
+            <li>Email must have a valid format</li>
+            <li>Date of Birth cannot be in the future (must be today or in the past)</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Get the form element
+    let form = document.getElementById('registerForm');
+
+    // Get the div where we show messages
+    let messageDiv = document.getElementById('message');
+
+    // This function runs when the user clicks submit
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();  // Stop the page from refreshing
+
+        // Get all the values from the input boxes
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+        let confirmPwd = document.getElementById('confirmPassword').value;
+        let email = document.getElementById('email').value;
+        let dob = document.getElementById('dob').value;
+
+        // We will collect all error messages in this array
+        let errors = [];
+
+        // VALIDATION 1: Check if any field is empty 
+        if (username.trim() === "") {
+            errors.push("Username is required.");
+        }
+        if (password.trim() === "") {
+            errors.push("Password is required.");
+        }
+        if (confirmPwd.trim() === "") {
+            errors.push("Please confirm your password.");
+        }
+        if (email.trim() === "") {
+            errors.push("Email is required.");
+        }
+        if (dob === "") {
+            errors.push("Date of Birth is required.");
+        }
+
+        // VALIDATION 2: Username minimum 4 characters 
+        if (username.trim() !== "" && username.length < 4) {
+            errors.push("Username must be at least 4 characters long.");
+        }
+
+        // VALIDATION 3: Password minimum 8 characters + alphanumeric (letters and numbers) 
+        if (password !== "") {
+            // Check length
+            if (password.length < 8) {
+                errors.push("Password must be at least 8 characters long.");
+            }
+            // Check if it has at least one letter (a-z or A-Z)
+            let hasLetter = false;
+            for (let i = 0; i < password.length; i++) {
+                let char = password[i];
+                if ((char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')) {
+                    hasLetter = true;
+                    break;
+                }
+            }
+            // Check if it has at least one number (0-9)
+            let hasNumber = false;
+            for (let i = 0; i < password.length; i++) {
+                let char = password[i];
+                if (char >= '0' && char <= '9') {
+                    hasNumber = true;
+                    break;
+                }
+            }
+            if (!hasLetter || !hasNumber) {
+                errors.push("Password must contain both letters and numbers.");
+            }
+        }
+
+        // VALIDATION 4: Password and Confirm Password match 
+        if (password !== "" && confirmPwd !== "" && password !== confirmPwd) {
+            errors.push("Password and Confirm Password do not match.");
+        }
+
+        // VALIDATION 5: Email format using regex (BETTER VERSION) 
+        // This regex checks: at least one character before @, then @, then at least one character,
+        // then a dot, then at least one character after the dot. No spaces allowed anywhere.
+        // Example valid: name@domain.com, my.email@co.uk (the dot after @ is required)
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email !== "" && !emailPattern.test(email)) {
+            errors.push("Please enter a valid email address (e.g., name@domain.com).");
+        }
+
+        //VALIDATION 6: Date of Birth not in the future 
+        if (dob !== "") {
+            // Create a Date object from the selected date (format YYYY-MM-DD)
+            let selectedDate = new Date(dob);
+            // Get today's date (without time part for fair comparison)
+            let today = new Date();
+            today.setHours(0, 0, 0, 0);
+            // If the selected date is after today, it's invalid (future)
+            if (selectedDate > today) {
+                errors.push("Date of Birth cannot be in the future. Please select a past date.");
+            }
+        }
+
+        // Show messages based on errors array 
+        if (errors.length === 0) {
+            // All validations passed
+            messageDiv.innerHTML = "✅ Registration successful!";
+            messageDiv.className = "message-box success";
+        } else {
+            // There are errors: display them as a list
+            let errorHtml = "<strong>Please fix these errors:</strong><br>";
+            for (let i = 0; i < errors.length; i++) {
+                errorHtml += "• " + errors[i] + "<br>";
+            }
+            messageDiv.innerHTML = errorHtml;
+            messageDiv.className = "message-box error";
+        }
+    });
+</script>
+</body>
+</html>
