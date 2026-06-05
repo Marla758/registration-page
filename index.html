@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Registration Page</title>
     <style>
-       
         body {
             font-family: Arial, sans-serif;
             background: #f2f2f2;
@@ -77,41 +76,40 @@
     </style>
 </head>
 <body>
-<div class="form-container">
-    <h2>Registration Form</h2>
 
-    <!-- the form with all input fields -->
-    <form id="registerForm">
+<div class="form-container">
+    <h2>Register</h2>
+
+    <form onsubmit="return checkForm()">
         <div class="input-group">
             <label>Username:</label>
-            <input type="text" id="username" placeholder="At least 4 characters">
+            <input type="text" id="user" placeholder="at least 4 characters">
         </div>
 
         <div class="input-group">
             <label>Password:</label>
-            <input type="password" id="password" placeholder="Min 8 chars, letters + numbers">
+            <input type="password" id="pass" placeholder="min 8 chars, letters + numbers">
         </div>
 
         <div class="input-group">
             <label>Confirm Password:</label>
-            <input type="password" id="confirmPassword" placeholder="Re-enter password">
+            <input type="password" id="confirmPass" placeholder="type password again">
         </div>
 
         <div class="input-group">
             <label>Email:</label>
-            <input type="email" id="email" placeholder="name@example.com">
+            <input type="email" id="emailAddr" placeholder="name@example.com">
         </div>
 
         <div class="input-group">
             <label>Date of Birth:</label>
-            <input type="date" id="dob">
+            <input type="date" id="birthDate">
         </div>
 
         <button type="submit">Submit</button>
     </form>
 
-    <!-- This div will show error or success messages -->
-    <div id="message" class="message-box">
+    <div id="resultMessage" class="message-box">
         Fill all fields and click Submit.
     </div>
 
@@ -120,129 +118,100 @@
         <ul>
             <li>All fields must be filled</li>
             <li>Username must have at least 4 characters</li>
-            <li>Password must be at least 8 characters long AND contain at least one letter AND one number</li>
-            <li>Password and Confirm Password must match exactly</li>
-            <li>Email must have a valid format</li>
-            <li>Date of Birth cannot be in the future (must be today or in the past)</li>
+            <li>Password must be at least 8 chars, letters + numbers</li>
+            <li>Password and Confirm Password match</li>
+            <li>Valid email format</li>
+            <li>Date of Birth not in future</li>
         </ul>
     </div>
 </div>
 
 <script>
-    // Get the form element
-    let form = document.getElementById('registerForm');
+    // Function runs when form is submitted
+    function checkForm() {
+        // Get input values
+        let username = document.getElementById("user").value;
+        let password = document.getElementById("pass").value;
+        let confirmPwd = document.getElementById("confirmPass").value;
+        let email = document.getElementById("emailAddr").value;
+        let dob = document.getElementById("birthDate").value;
 
-    // Get the div where we show messages
-    let messageDiv = document.getElementById('message');
+        let errorsList = [];
 
-    // This function runs when the user clicks submit
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();  // Stop the page from refreshing
+        // Check empty fields
+        if (username === "") errorsList.push("Username is required.");
+        if (password === "") errorsList.push("Password is required.");
+        if (confirmPwd === "") errorsList.push("Please confirm your password.");
+        if (email === "") errorsList.push("Email is required.");
+        if (dob === "") errorsList.push("Date of Birth is required.");
 
-        // Get all the values from the input boxes
-        let username = document.getElementById('username').value;
-        let password = document.getElementById('password').value;
-        let confirmPwd = document.getElementById('confirmPassword').value;
-        let email = document.getElementById('email').value;
-        let dob = document.getElementById('dob').value;
-
-        // We will collect all error messages in this array
-        let errors = [];
-
-        // VALIDATION 1: Check if any field is empty 
-        if (username.trim() === "") {
-            errors.push("Username is required.");
-        }
-        if (password.trim() === "") {
-            errors.push("Password is required.");
-        }
-        if (confirmPwd.trim() === "") {
-            errors.push("Please confirm your password.");
-        }
-        if (email.trim() === "") {
-            errors.push("Email is required.");
-        }
-        if (dob === "") {
-            errors.push("Date of Birth is required.");
+        // Username length
+        if (username !== "" && username.length < 4) {
+            errorsList.push("Username must be at least 4 characters.");
         }
 
-        // VALIDATION 2: Username minimum 4 characters 
-        if (username.trim() !== "" && username.length < 4) {
-            errors.push("Username must be at least 4 characters long.");
-        }
-
-        // VALIDATION 3: Password minimum 8 characters + alphanumeric (letters and numbers) 
+        // Password strength
         if (password !== "") {
-            // Check length
             if (password.length < 8) {
-                errors.push("Password must be at least 8 characters long.");
+                errorsList.push("Password must be at least 8 characters long.");
             }
-            // Check if it has at least one letter (a-z or A-Z)
             let hasLetter = false;
-            for (let i = 0; i < password.length; i++) {
-                let char = password[i];
-                if ((char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z')) {
-                    hasLetter = true;
-                    break;
-                }
-            }
-            // Check if it has at least one number (0-9)
             let hasNumber = false;
             for (let i = 0; i < password.length; i++) {
-                let char = password[i];
-                if (char >= '0' && char <= '9') {
-                    hasNumber = true;
-                    break;
-                }
+                let ch = password[i];
+                if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) hasLetter = true;
+                if (ch >= '0' && ch <= '9') hasNumber = true;
             }
             if (!hasLetter || !hasNumber) {
-                errors.push("Password must contain both letters and numbers.");
+                errorsList.push("Password must have both letters and numbers.");
             }
         }
 
-        // VALIDATION 4: Password and Confirm Password match 
+        // Password match
         if (password !== "" && confirmPwd !== "" && password !== confirmPwd) {
-            errors.push("Password and Confirm Password do not match.");
+            errorsList.push("Password and Confirm Password do not match.");
         }
 
-        // VALIDATION 5: Email format using regex (BETTER VERSION) 
-        // This regex checks: at least one character before @, then @, then at least one character,
-        // then a dot, then at least one character after the dot. No spaces allowed anywhere.
-        // Example valid: name@domain.com, my.email@co.uk (the dot after @ is required)
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // Email format
+        let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (email !== "" && !emailPattern.test(email)) {
-            errors.push("Please enter a valid email address (e.g., name@domain.com).");
+            errorsList.push("Enter a valid email (like name@domain.com).");
         }
 
-        //VALIDATION 6: Date of Birth not in the future 
+        // Date not in future
         if (dob !== "") {
-            // Create a Date object from the selected date (format YYYY-MM-DD)
             let selectedDate = new Date(dob);
-            // Get today's date (without time part for fair comparison)
-            let today = new Date();
-            today.setHours(0, 0, 0, 0);
-            // If the selected date is after today, it's invalid (future)
-            if (selectedDate > today) {
-                errors.push("Date of Birth cannot be in the future. Please select a past date.");
+            let todayDate = new Date();
+            todayDate.setHours(0, 0, 0, 0);
+            if (selectedDate > todayDate) {
+                errorsList.push("Date of Birth cannot be in the future.");
             }
         }
 
-        // Show messages based on errors array 
-        if (errors.length === 0) {
-            // All validations passed
-            messageDiv.innerHTML = "✅ Registration successful!";
-            messageDiv.className = "message-box success";
+        // Show result and clear fields on success
+        let msgDiv = document.getElementById("resultMessage");
+        if (errorsList.length === 0) {
+            // Success: clear all input fields
+            document.getElementById("user").value = "";
+            document.getElementById("pass").value = "";
+            document.getElementById("confirmPass").value = "";
+            document.getElementById("emailAddr").value = "";
+            document.getElementById("birthDate").value = "";
+            
+            msgDiv.innerHTML = "✅ Registration successful! Form cleared.";
+            msgDiv.className = "message-box success";
         } else {
-            // There are errors: display them as a list
-            let errorHtml = "<strong>Please fix these errors:</strong><br>";
-            for (let i = 0; i < errors.length; i++) {
-                errorHtml += "• " + errors[i] + "<br>";
+            // Show errors
+            let errorText = "<strong>Fix these errors:</strong><br>";
+            for (let i = 0; i < errorsList.length; i++) {
+                errorText += "• " + errorsList[i] + "<br>";
             }
-            messageDiv.innerHTML = errorHtml;
-            messageDiv.className = "message-box error";
+            msgDiv.innerHTML = errorText;
+            msgDiv.className = "message-box error";
         }
-        	form.reset();
-    });
+
+        return false;  // Prevent page refresh
+    }
 </script>
 </body>
 </html>
